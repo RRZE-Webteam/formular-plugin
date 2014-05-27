@@ -1,0 +1,74 @@
+<h2>Umfrage: Studium und Universität</h2>
+<p>
+	Lieber Studierender, vielen Dank, dass Sie sich für die Umfrage kurz Zeit nehmen.
+	Sie werden ungefähr eine Minute dafür benötigen. Herzliche Grüße von der Universität.<br/>
+	Diese Umfrage enthält 4 Fragen.
+</p>
+<p>
+	Hinweise zum Datenschutz:<br/>
+	Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat.
+</p>
+{form_open}
+	<div>
+        <fieldset>
+            <legend>An welche Fakultät studieren Sie?</legend>
+            <div class="abstand">
+                <div class="zeile">
+					{fakultaeten_error}
+					<p>
+						{fakultaeten}
+					</p>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>In welchem Studienjahr bzw. Studienniveau befinden Sie sich?</legend>
+            <div class="abstand">
+                <div class="zeile">
+					{studienjahr_error}
+					<p>
+						{studienjahr}
+					</p>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Wie würden Sie die Zufriedenheit mit Ihrer Uni angeben?</legend>
+            <div class="abstand">
+                <div class="zeile">
+					{zufriedenheit_error}
+					<p>
+						{zufriedenheit}
+					</p>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Bekommen Sie jetzt ein Stipendium?</legend>
+            <div class="abstand">
+                <div class="zeile">
+					{stipendium_error}
+					<p>
+						{stipendium}
+					</p>
+                </div>
+                <div class="zeile">
+					<p>
+						Wenn ja: Wofür geben Sie das Geld aus? (bitte maximal 2 Antworten auswählen!)
+					</p>
+					{stipendium_ausgeben_error}
+					<p>
+						{stipendium_ausgeben}
+					</p>
+					<p>
+						{stipendium_zusatz}
+					</p>
+                </div>
+            </div>
+        </fieldset>
+
+        <p>
+            {form_submit}
+        </p>
+    </div>
+{form_close}

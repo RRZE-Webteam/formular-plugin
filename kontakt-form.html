@@ -1,0 +1,39 @@
+{form_open}
+	<div>
+        <fieldset>
+            <legend>Kontaktformular</legend>
+            <div class="abstand">
+                <div class="zeile">
+					<div class="datenart">
+						<label for="name">Name</label>
+						{name_error}
+					</div>
+					<div class="eingabe">
+						{name}
+					</div>
+                </div>
+                <div class="zeile">
+					<div class="datenart">
+						<label for="email">E-Mail-Adresse</label>
+						{email_error}
+					</div>
+					<div class="eingabe">
+						{email}
+					</div>
+                </div>
+                <div class="zeile">
+					<div class="datenart">
+						<label for="text">Nachricht</label>
+						{text_error}
+					</div>
+					<div class="eingabe">
+						{text}
+					</div>
+                </div>
+            </div>
+        </fieldset>
+        <p>
+            {form_submit}
+        </p>
+    </div>
+{form_close}

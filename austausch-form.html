@@ -1,0 +1,69 @@
+{form_open_multipart}
+<div>
+    <fieldset>
+        <legend>Datenaustauschservice</legend>
+        <div class="abstand">
+
+            <p>
+                Sie können mit diesem Formular {file_allowed_types}-Dateien bis zu einer
+                Größe von <b>{file_max_size}</b> hochladen.
+            </p>
+            <p>
+                <b>
+                    Die Datenübertragung erfolgt unverschlüsselt, sicherheits-
+                    oder datenschutzsensible Daten dürfen auf diese Weise nicht übertragen werden!
+                </b>
+            </p>
+
+            <div class="zeile">
+                <div class="datenart">
+                    <label for="sendername">Ihr Name</label>
+                    {sendername_error}
+                </div>
+                <div class="eingabe">
+                    {sendername}
+                </div>
+            </div>
+            <div class="zeile">
+                <div class="datenart">
+                    <label for="senderemail">Ihre E-Mail-Adresse</label>
+                    {senderemail_error}
+                </div>
+                <div class="eingabe">
+                    {senderemail}
+                </div>
+            </div>
+            <div class="zeile">
+                <div class="datenart">
+                    <label for="empfaengeremail">E-Mail-Adresse der Empfangsstelle</label>
+                    {empfaengeremail_error}
+                </div>
+                <div class="eingabe">
+                    {empfaengeremail}
+                </div>
+            </div>            
+            <div class="zeile">
+                <div class="datenart">
+                    <label for="text">Information an die Empfangsstelle</label>
+                    {text_error}
+                </div>
+                <div class="eingabe">
+                    {text}
+                </div>
+            </div>
+            <div class="zeile">
+                <div class="datenart">
+                    <label for="upload">zu übertragende Datei</label>
+                    {datei_error}
+                </div>
+                <div class="eingabe">
+                    {datei}
+                </div>
+            </div>                
+        </div>
+    </fieldset>
+    <p>
+        {form_submit}
+    </p>
+</div>
+{form_close}

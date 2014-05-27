@@ -1,0 +1,60 @@
+{form_open_multipart}
+<div>
+    <fieldset>
+        <legend>Kontaktformular</legend>
+        <div class="abstand">
+
+            <p>
+                Sie können mit diesem Formular {file_allowed_types}-Dateien bis zu einer
+                Größe von <b>{file_max_size}</b> hochladen.
+            </p>
+            <p>
+                <b>
+                    Die Datenübertragung erfolgt unverschlüsselt, sicherheits-
+                    oder datenschutzsensible Daten dürfen auf diese Weise nicht übertragen werden!
+                </b>
+            </p>
+
+            <div class="zeile">
+                <div class="datenart">
+                    <label for="name">Name</label>
+                    {name_error}
+                </div>
+                <div class="eingabe">
+                    {name}
+                </div>
+            </div>
+            <div class="zeile">
+                <div class="datenart">
+                    <label for="email">E-Mail-Adresse</label>
+                    {email_error}
+                </div>
+                <div class="eingabe">
+                    {email}
+                </div>
+            </div>
+            <div class="zeile">
+                <div class="datenart">
+                    <label for="text">Nachricht</label>
+                    {text_error}
+                </div>
+                <div class="eingabe">
+                    {text}
+                </div>
+            </div>
+            <div class="zeile">
+                <div class="datenart">
+                    <label for="upload">Datei</label>
+                    {datei_error}
+                </div>
+                <div class="eingabe">
+                    {datei}
+                </div>
+            </div>                
+        </div>
+    </fieldset>
+    <p>
+        {form_submit}
+    </p>
+</div>
+{form_close}

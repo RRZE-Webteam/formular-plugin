@@ -1,0 +1,85 @@
+{form_open}
+	<div>
+        <fieldset>
+            <legend>Angaben zur Person</legend>
+            <div class="abstand">
+                <div class="zeile">
+					<div class="datenart">
+						<label for="vorname">Vorname</label>
+						{vorname_error}
+					</div>
+					<div class="eingabe">
+						{vorname}
+					</div>
+                </div>
+                <div class="zeile">
+					<div class="datenart">
+						<label for="familienname">Familienname</label>
+						{familienname_error}
+					</div>
+					<div class="eingabe">
+						{familienname}
+					</div>
+                </div>
+                <div class="zeile">
+					<div class="datenart">
+						<label for="email">E-Mail-Adresse</label>
+						{email_error}
+					</div>
+					<div class="eingabe">
+						{email}
+					</div>
+                </div>
+                <div class="zeile">
+					<div class="datenart">
+						<label for="wohnort">Wohnort</label>
+						{wohnort_error}
+					</div>
+					<div class="eingabe">
+						{wohnort}
+					</div>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Hast du Schon bei uns gekauft?</legend>
+            <div class="abstand">
+                <div class="zeile">
+					<p>
+						{schon_gekauft}
+					</p>
+					{schon_gekauft_error}
+                </div>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Deine Musikinteressen</legend>
+            <div class="abstand">
+                <div class="zeile">
+					<p>Hier musst Du Dich für einen Star entscheiden</p>
+					<p>
+						{liebling}
+					</p>
+					{liebling_error}
+                </div>
+                <div class="zeile">
+					<p>Hier kannst Du mehrere Möglichkeiten ankreuzen</p>
+					<p>
+						{interessen}
+					</p>
+					{interessen_error}
+                </div>
+                <div class="zeile">
+					<label for="zusatz">Wenn du uns sonst noch etwas über Deine Wünsche und Erwartungen an unser Programm mitteilen willst, kannst du dies hier tun</label>
+					<p>
+						{zusatz}
+					</p>
+					{zusatz_error}
+                </div>
+            </div>
+        </fieldset>
+        <p>
+            {form_submit}
+        </p>
+    </div>
+{form_close}
