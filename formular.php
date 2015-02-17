@@ -4,7 +4,7 @@
   Plugin Name: Formular
   Plugin URI: http://www.vorlagen.uni-erlangen.de/vorlagen/hilfreiche-plugins/formular.shtml
   Description: Das Formular-Plugin vereinfacht die Erstellung von Formularen, dessen Absenden, Validierung und Weiterverarbeitung.
-  Version: 1.14.0527
+  Version: 1.15.0217
   Author: Rolf v.d. Forst, RRZE WebTeam
   Author Email: rolf.v.d.forst@fau.de
   Author URI: http://blogs.fau.de/webworking/
@@ -27,9 +27,9 @@ define('DOWNLOADURL', $plugin_url);
 $str = <<<EOF
 <div class="hinweis">
     <p>
-		Erfolgreich abgesendet.<br />
+        Erfolgreich abgesendet.<br />
         Vielen Dank, für Ihre Anfrage.
-	</p>
+    </p>
 </div>
 EOF;
 define('SUCCESS_VIEW', $str);
@@ -37,9 +37,9 @@ define('SUCCESS_VIEW', $str);
 $str = <<<EOF
 <div class="hinweis_wichtig">
     <p>
-	    Absendung fehlgeschlagen.<br />
+        Absendung fehlgeschlagen.<br />
         Bitte versuchen Sie es erneut.
-	</p>
+    </p>
 </div>
 EOF;
 define('ERROR_VIEW', $str);
@@ -47,9 +47,9 @@ define('ERROR_VIEW', $str);
 $str = <<<EOF
 <div class="hinweis_wichtig">
     <p>
-	    Sie haben dieses Formular bereits abgesendet.<br />
-		Vielen Dank.
-	</p>
+        Sie haben dieses Formular bereits abgesendet.<br />
+        Vielen Dank.
+    </p>
 </div>
 EOF;
 define('LOCK_VIEW', $str);
@@ -73,7 +73,7 @@ class Formular {
     private static $conferror = '';
 
     public static function init($appconf = '') {
-        self::$referer = Input::get('referer', true);
+        self::$referer = self::clean_referer(Input::get('referer', true));
         if (!empty(self::$referer)) {
             $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https://' : 'http://';
             self::$redirect = sprintf('%s%s%s', $protocol, $_SERVER['HTTP_HOST'], self::$referer);
@@ -123,89 +123,89 @@ class Formular {
         }
 
         $data = array();
-		$upload = array();
+        $upload = array();
         $fields = $config['form_field'];
 
         if (Session::flashdata(md5(sprintf('%s-postdata', $appconf)))) {
             $postdata = unserialize(Session::flashdata(md5(sprintf('%s-postdata', $appconf))));
             $_POST = array_merge($_POST, $postdata);
         }
-		
-		if (isset($config['rules_messages'])) {
-			$fields_messages = Validation::$field_messages;
-			Validation::$field_messages = array_replace($fields_messages, $config['rules_messages']);
-		}
+        
+        if (isset($config['rules_messages'])) {
+            $fields_messages = Validation::$field_messages;
+            Validation::$field_messages = array_replace($fields_messages, $config['rules_messages']);
+        }
 
-		foreach ($config['form_field'] as $field) {
-			if (in_array($field['type'], array('radio', 'checkbox'))) {
-				$fieldname = sprintf('%s[]', $field['name']);
-			} else {
-				$fieldname = $field['name'];
-			}
-			if ($field['type'] != 'upload')
-				Validation::set_rules($fieldname, $field['rules']);
-		}
+        foreach ($config['form_field'] as $field) {
+            if (in_array($field['type'], array('radio', 'checkbox'))) {
+                $fieldname = sprintf('%s[]', $field['name']);
+            } else {
+                $fieldname = $field['name'];
+            }
+            if ($field['type'] != 'upload')
+                Validation::set_rules($fieldname, $field['rules']);
+        }
 
-		$validation = Validation::run();
-		
+        $validation = Validation::run();
+        
         if (!empty($_POST['submit'])) {
-						
+                        
             foreach ($fields as $key => $field) {
-				if (in_array($field['type'], array('radio', 'checkbox'))) {
-					$fieldname = sprintf('%s[]', $field['name']);
-					$postdata[sprintf('%s_error', $fieldname)] = Form::form_error($fieldname, $error['prefix'], $error['suffix']);
-					
-				} elseif (in_array($field['type'], array('dropdown'))) {
-					$postdata[sprintf('%s_error', $field['name'])] = Form::form_error($field['name'], $error['prefix'], $error['suffix']);
-	
-				
-				} elseif ($field['type'] == 'upload') {
+                if (in_array($field['type'], array('radio', 'checkbox'))) {
+                    $fieldname = sprintf('%s[]', $field['name']);
+                    $postdata[sprintf('%s_error', $fieldname)] = Form::form_error($fieldname, $error['prefix'], $error['suffix']);
+                    
+                } elseif (in_array($field['type'], array('dropdown'))) {
+                    $postdata[sprintf('%s_error', $field['name'])] = Form::form_error($field['name'], $error['prefix'], $error['suffix']);
+    
+                
+                } elseif ($field['type'] == 'upload') {
 
                     if (mb_strstr($field['rules'], 'required') && empty($_FILES[$field['name']]['size'])) {
                         $postdata[$field['name'] . '_error'] = sprintf('%sSie haben keine Datei zum Hochladen ausgew&auml;hlt.%s', $error['prefix'], $error['suffix']);
                         $upload[] = false;
-						continue;
-					}
-					
+                        continue;
+                    }
+                    
                     if (!empty($_FILES[$field['name']]['size'])) {
                         File::set_allowed_types($config['file_allowed_types']);
                         File::set_max_filesize($config['file_max_size']);
 
-						if (!File::upload(UPLOADPATH, $field['name'], true)) {
+                        if (!File::upload(UPLOADPATH, $field['name'], true)) {
                             $postdata[$field['name'] . '_error'] = File::get_errors($error['prefix'], $error['suffix']);
-							$upload[] = false;
-                            continue;							
-						}
-						
+                            $upload[] = false;
+                            continue;                           
+                        }
+                        
                         if ($validation) {
-							if(!File::upload(UPLOADPATH, $field['name'])) {
-								$postdata[$field['name'] . '_error'] = File::get_errors($error['prefix'], $error['suffix']);
-								$upload[] = false;                          
-							} else {
-								$postdata[$field['name'] . '_file_name'] = File::get_file_name();
-							}
+                            if(!File::upload(UPLOADPATH, $field['name'])) {
+                                $postdata[$field['name'] . '_error'] = File::get_errors($error['prefix'], $error['suffix']);
+                                $upload[] = false;                          
+                            } else {
+                                $postdata[$field['name'] . '_file_name'] = File::get_file_name();
+                            }
                         }
                     }
 
-				} else {
-					$postdata[sprintf('%s_error', $field['name'])] = Form::form_error($field['name'], $error['prefix'], $error['suffix']);
-				}
-				
-            }			
-			
-			$postdata['upload'] = $upload;
-			
-			unset($_POST['submit']);
-			$postdata = array_merge($postdata, $_POST);
-			
+                } else {
+                    $postdata[sprintf('%s_error', $field['name'])] = Form::form_error($field['name'], $error['prefix'], $error['suffix']);
+                }
+                
+            }           
+            
+            $postdata['upload'] = $upload;
+            
+            unset($_POST['submit']);
+            $postdata = array_merge($postdata, $_POST);
+            
             Session::set_flashdata(md5(sprintf('%s-postdata', $appconf)), serialize($postdata));
             Url::redirect(self::$redirect);
         }
-		
+        
         if ($validation && empty($postdata['upload'])) {
             $csv = array();
-			$result = '';
-			
+            $result = '';
+            
             $csv['date'] = date('Y-m-d H:s:i');
 
             $email_receiver = $config['email_receiver'];
@@ -279,66 +279,66 @@ class Formular {
                     File::write_to_csv($csv);
                 }
                 
-				$result = 'success';
-				
+                $result = 'success';
+                
                 if ($cookie_lock)
                     setcookie(md5(sprintf('%s-lock', $appconf)), true, Config::get('utc') + 31536000, '/');
             
             } else {
             
-				if (isset($email_views['receiver']) && file_exists($tpl = sprintf('%s%s.html', APPPATH, $email_views['receiver']))) {
-					$body = Template::parse($tpl, $data, true);
-				} else {
-					$body = '';
-					foreach ($csv as $key => $value) {
-						$body .= sprintf("%s: %s \n", $key, $value);
-					}
-				}
+                if (isset($email_views['receiver']) && file_exists($tpl = sprintf('%s%s.html', APPPATH, $email_views['receiver']))) {
+                    $body = Template::parse($tpl, $data, true);
+                } else {
+                    $body = '';
+                    foreach ($csv as $key => $value) {
+                        $body .= sprintf("%s: %s \n", $key, $value);
+                    }
+                }
 
-				Email::sender($sender);
-				Email::receiver($receiver);
-				Email::subject($subject);
-				Email::body($body);
+                Email::sender($sender);
+                Email::receiver($receiver);
+                Email::subject($subject);
+                Email::body($body);
 
-				if (Email::send()) {
+                if (Email::send()) {
 
-					if ($csv_entries) {
-						File::set(ENTRIESPATH, sprintf('%s.csv', $appconf), true);
-						File::write_to_csv($csv);
-					}
+                    if ($csv_entries) {
+                        File::set(ENTRIESPATH, sprintf('%s.csv', $appconf), true);
+                        File::write_to_csv($csv);
+                    }
 
-					if (isset($email_views['sender']) && file_exists($tpl = sprintf('%s%s.html', APPPATH, $email_views['sender']))) {
-						$body = Template::parse($tpl, $data, true);
-						Email::sender($receiver);
-						Email::receiver($sender);
-						Email::subject($subject);
-						Email::body($body);
-						Email::send();
-					}
+                    if (isset($email_views['sender']) && file_exists($tpl = sprintf('%s%s.html', APPPATH, $email_views['sender']))) {
+                        $body = Template::parse($tpl, $data, true);
+                        Email::sender($receiver);
+                        Email::receiver($sender);
+                        Email::subject($subject);
+                        Email::body($body);
+                        Email::send();
+                    }
 
-					foreach ($email_infos as $email => $view) {
-						if (!empty($email) && file_exists($tpl = sprintf('%s%s.html', APPPATH, $view))) {
-							$receiver = array($email => $email);
-							$body = Template::parse($tpl, $data, true);
-							Email::sender($sender);
-							Email::receiver($receiver);
-							Email::subject($subject);
-							Email::body($body);
-							Email::send();
-						}
-					}
+                    foreach ($email_infos as $email => $view) {
+                        if (!empty($email) && file_exists($tpl = sprintf('%s%s.html', APPPATH, $view))) {
+                            $receiver = array($email => $email);
+                            $body = Template::parse($tpl, $data, true);
+                            Email::sender($sender);
+                            Email::receiver($receiver);
+                            Email::subject($subject);
+                            Email::body($body);
+                            Email::send();
+                        }
+                    }
 
-					$result = 'success';
-					
-					if ($cookie_lock)
-						setcookie(md5(sprintf('%s-lock', $appconf)), true, Config::get('utc') + 31536000, '/');
+                    $result = 'success';
+                    
+                    if ($cookie_lock)
+                        setcookie(md5(sprintf('%s-lock', $appconf)), true, Config::get('utc') + 31536000, '/');
 
-				} else {
-					$result = 'error';
-				}
-			
-			}
-			
+                } else {
+                    $result = 'error';
+                }
+            
+            }
+            
             if (isset($views[$result]) && file_exists($tpl = sprintf('%s%s.html', APPPATH, $views[$result])))
                 return Template::parse($tpl, array(), true);
 
@@ -419,7 +419,7 @@ class Formular {
             } else {
                 $data[sprintf('%s_error', $field['name'])] = isset($postdata[sprintf('%s_error', $field['name'])]) ? $postdata[sprintf('%s_error', $field['name'])] : '';
                 
-				$values = array();
+                $values = array();
                 $values['name'] = $field['name'];
 
                 $values['value'] = Validation::set_value($values['name'], $field['value']);
@@ -721,6 +721,17 @@ class Formular {
         
         array_walk($value, create_function('&$val', '$val = preg_replace( "/[^a-z0-9]/i", "", strtolower($val) );'));
         return $value;
+    }
+
+    private static function clean_referer($referer) {
+        $path = parse_url($referer, PHP_URL_PATH);
+        
+        $path = strip_tags($path);
+        $path = strstr($path, '.shtml', true);
+        
+        $referer = !empty($path) ? htmlentities($path) . '.shtml' : '';
+        
+        return $referer;
     }
 
 }
