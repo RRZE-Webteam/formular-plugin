@@ -4,7 +4,7 @@
   Plugin Name: Formular
   Plugin URI: http://www.vorlagen.uni-erlangen.de/vorlagen/hilfreiche-plugins/formular.shtml
   Description: Das Formular-Plugin vereinfacht die Erstellung von Formularen, dessen Absenden, Validierung und Weiterverarbeitung.
-  Version: 1.15.0217
+  Version: 1.15.0225
   Author: Rolf v.d. Forst, RRZE WebTeam
   Author Email: rolf.v.d.forst@fau.de
   Author URI: http://blogs.fau.de/webworking/
@@ -442,7 +442,16 @@ class Formular {
     }
 
     private static function loadconf($appconf) {
-        $config = Config::load_options(sprintf('%s%s.conf', APPPATH, $appconf));
+		$doc_root  = preg_replace("!{$_SERVER['SCRIPT_NAME']}$!", '', $_SERVER['SCRIPT_FILENAME']);
+		$vkdaten_file = sprintf('%1$s/vkdaten/%2$s.conf', $doc_root, $appconf);
+		
+		if(file_exists($vkdaten_file)) {
+			$conf_file = $vkdaten_file;
+		} else {
+			$conf_file = sprintf('%1$s%2$s.conf', APPPATH, $appconf);
+		}
+		
+        $config = Config::load_options($conf_file);
         if (!$config) {
             self::$conferror = sprintf('Die Konfigurationsdatei "%s.conf" konnte nicht geladen werden.', $appconf);
             return false;
