@@ -22,22 +22,35 @@ class Config {
 
 	// Load options from a tab separated config file
     public static function load_options($file = '') {
-        $options = array();
+        $error = false;
+		$options = array();
         $fh = fopen($file, 'r');
-        if( empty($fh)) return $options;
-
-        while( !feof($fh)) {
+        
+		if(empty($fh)) {
+			return false;
+		}
+		
+        while(!feof($fh)) {
             $line = fgets($fh);
             $line = trim($line);
             if((strlen($line) == 0) || (substr($line, 0, 1) == '#')) {
                 continue; // ignore comments and empty rows
             }
             $arr_opts = preg_split('/\t/', $line); // tab separated
+			if(count($arr_opts) == 2) {
+				$options[] = $arr_opts;
+			} else {
+				$error = true;
+			}
 
-			$options[] = $arr_opts;
         }
 
         fclose($fh);
+		
+		if(empty($options) || $error) {
+			return false;
+		}
+		
         return $options;
     }
 
