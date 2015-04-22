@@ -8,7 +8,7 @@ $config['locale'] = array('de_De.utf8', 'de_DE@euro', 'de_DE');
 
 $config['utc'] = time();
 
-$config['site_url']	= ($_SERVER['SERVER_PORT'] == 443 ? 'https://' : 'http://').$_SERVER["HTTP_HOST"].'/';
+$config['site_url']	= (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://').$_SERVER["HTTP_HOST"].'/';
 
 $config['cookie_domain'] = '';
 
