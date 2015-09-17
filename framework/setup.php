@@ -1,4 +1,9 @@
 <?php
+if (defined('FORMULAR_DEBUG') && FORMULAR_DEBUG) {
+	error_reporting(-1);
+	ini_set('display_errors', 1);
+}
+
 if (version_compare(PHP_VERSION, '5.3.0') < 0)
 	die('Das Plugin benötigt PHP version 5.3.0 oder höher.');
 

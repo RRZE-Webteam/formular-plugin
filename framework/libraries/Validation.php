@@ -33,7 +33,8 @@ class Validation extends pattern\Singleton {
           'matches' => "Das Feld muss mit dem Feld %s übereinstimmen.",
           'is_natural' => "Das Feld darf nur positive Zahlen enthalten.",
           'is_natural_no_zero' => "Das Feld muss eine Zahl größer als 0 enthalten.",
-          'hexcolor' => "Das Feld muss mit # beginnen und durch einen hexadezimalen Farbwert gefolgt."
+          'hexcolor' => "Das Feld muss mit # beginnen und durch einen hexadezimalen Farbwert gefolgt.",
+		  'valid_captcha' => "Das Feld muss mit dem Zeichen %s übereinstimmen."
         );
 
 	protected static $instance;
@@ -567,6 +568,15 @@ class Validation extends pattern\Singleton {
         return preg_replace('/\s\s+/u', ' ', $str);
     }
 
+	public static function valid_captcha($str) {
+		$word = Session::userdata('captcha');
+		if(strcmp(strtoupper($str),strtoupper($word)) == 0){
+			return true;
+		} else{
+			return false;
+		}
+	}
+	
     public static function prep_for_form($data = '') {
         if (is_array($data)) {
             foreach ($data as $key => $val) {

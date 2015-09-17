@@ -4,25 +4,32 @@
   Plugin Name: Formular
   Plugin URI: http://www.vorlagen.uni-erlangen.de/vorlagen/hilfreiche-plugins/formular.shtml
   Description: Das Formular-Plugin vereinfacht die Erstellung von Formularen, dessen Absenden, Validierung und Weiterverarbeitung.
-  Version: 1.15.0723
+  Version: 1.15.0917
   Author: Rolf v.d. Forst, RRZE WebTeam
   Author Email: rolf.v.d.forst@fau.de
   Author URI: http://blogs.fau.de/webworking/
   Support URI: http://www.portal.uni-erlangen.de/forums/viewforum/93
  *
  */
+
+// Debug
+define('FORMULAR_DEBUG', false);
+
 // Load framework/setup
 require_once('framework/setup.php');
 
 // Define paths
 define('APPPATH', realpath(pathinfo(__FILE__, PATHINFO_DIRNAME)) . '/');
 define('UPLOADPATH', APPPATH . 'anlagen/');
+define('CAPTCHAPATH', APPPATH . 'captcha/');
 define('ENTRIESPATH', APPPATH . 'eintraege/');
 
-$plugin_url = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://';
-$plugin_url .= sprintf('%s%s?download-file=', $_SERVER['HTTP_HOST'], $_SERVER['PHP_SELF']);
+$url_scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://';
+$base_url = $url_scheme . $_SERVER['HTTP_HOST'];
 
-define('DOWNLOADURL', $plugin_url);
+define('BASEURL', $base_url);
+define('DOWNLOADURL', BASEURL . $_SERVER['PHP_SELF'] . '?download-file=');
+define('CAPTCHAURL', BASEURL . $_SERVER['PHP_SELF'] . '?captcha-file=');
 
 $str = <<<EOF
 <div class="hinweis">
@@ -55,7 +62,12 @@ EOF;
 define('LOCK_VIEW', $str);
 
 if (isset($_GET['download-file']) && !empty($_GET['download-file'])) {
-    Formular::download_file(Input::get('download-file', true));
+    Formular::download_file(Input::get('download-file', true), UPLOADPATH);
+    exit();
+}
+
+if (isset($_GET['captcha-file']) && !empty($_GET['captcha-file'])) {
+    Formular::download_file(Input::get('captcha-file', true), CAPTCHAPATH);
     exit();
 }
 
@@ -416,6 +428,26 @@ class Formular {
 
                 $data[$field['name']] = call_user_func(array('Form', 'form_' . $field['type']), $values);
                 
+            } elseif ($field['type'] == 'captcha') {
+				if (!file_exists(CAPTCHAPATH))
+					mkdir(CAPTCHAPATH, 0777, true);
+				
+				$captcha_data = array(
+					'word' => substr(number_format(time() * rand(), 0, '', ''), 0, 4),
+					'img_path' => CAPTCHAPATH,
+					'img_url' => CAPTCHAURL,
+					'img_width' => 150,
+					'img_height' => 30,
+					'expiration' => 7200
+				);
+
+				$captcha = Captcha::create($captcha_data);
+				
+				Session::set_userdata('captcha', $captcha['word']);
+				
+                $data[sprintf('%s_error', $field['name'])] = isset($postdata[sprintf('%s_error', $field['name'])]) ? $postdata[sprintf('%s_error', $field['name'])] : '';				
+                $data[$field['name']] = call_user_func(array('Form', 'form_' . $field['type']), $field['name'], $field['value'], $captcha);
+				
             } else {
                 $data[sprintf('%s_error', $field['name'])] = isset($postdata[sprintf('%s_error', $field['name'])]) ? $postdata[sprintf('%s_error', $field['name'])] : '';
                 
@@ -674,12 +706,12 @@ class Formular {
         array_walk($value, create_function('&$val', '$val = trim($val);'));
         return $value;
     }
-
-    public static function download_file($filename = '') {
+	
+    public static function download_file($filename = '', $path = '') {
         if (empty($filename))
             Url::redirect('/error404.shtml');
 
-        $filepath = sprintf('%s%s', UPLOADPATH, $filename);
+        $filepath = sprintf('%s%s', $path, $filename);
         $data = file_get_contents($filepath);
         if (empty($data))
             Url::redirect('/error404.shtml');

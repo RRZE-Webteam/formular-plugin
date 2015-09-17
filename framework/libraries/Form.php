@@ -178,6 +178,12 @@ class Form {
 		return self::form_checkbox($data, $value, $checked, $extra);
 	}
 
+	public static function form_captcha($data = '', $value = '', $captcha = '') {
+		$defaults = array('type' => 'captcha', 'name' => (( ! is_array($data)) ? $data : ''), 'value' => $value);		
+
+		return "<span>".$captcha['image']."</span>&nbsp;<input ".self::parse_form_attributes($data, $defaults)." />";
+	}
+	
 	public static function form_submit($data = '', $value = '', $extra = '') {
 		$defaults = array('type' => 'submit', 'name' => (( ! is_array($data)) ? $data : ''), 'value' => $value);
 

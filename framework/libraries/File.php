@@ -517,4 +517,31 @@ class File extends pattern\Singleton {
 
     }
 
+	public static function is_really_writable($file) {
+		// If we're on a Unix server with safe_mode off we call is_writable
+		if (DIRECTORY_SEPARATOR === '/' && (version_compare(PHP_VERSION, '5.4', '>=') OR ! ini_get('safe_mode'))) {
+			return is_writable($file);
+		}
+
+		/* For Windows servers and safe_mode "on" installations we'll actually
+		 * write a file then read it. Bah...
+		 */
+		if (is_dir($file)) {
+			$file = rtrim($file, '/') . '/' . md5(mt_rand());
+			if (($fp = @fopen($file, 'ab')) === FALSE) {
+				return FALSE;
+			}
+
+			fclose($fp);
+			@chmod($file, 0777);
+			@unlink($file);
+			return TRUE;
+		} elseif (!is_file($file) OR ( $fp = @fopen($file, 'ab')) === FALSE) {
+			return FALSE;
+		}
+
+		fclose($fp);
+		return TRUE;
+	}
+
 }
