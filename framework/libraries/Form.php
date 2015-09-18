@@ -47,7 +47,7 @@ class Form {
 		}
 
 		if ( ! is_array($value)) {
-			$form .= '<input type="hidden" name="'.$name.'" value="'.self::form_prep($value, $name).'" />'."\n";
+			$form .= '<input type="hidden" name="'.$name.'" value="'.self::form_prep($value, $name).'" >'."\n";
 		} else {
 			foreach ($value as $k => $v) {
 				$k = (is_int($k)) ? '' : $k;
@@ -61,7 +61,7 @@ class Form {
 	public static function form_input($data = '', $value = '', $extra = '') {
 		$defaults = array('type' => 'text', 'name' => (( ! is_array($data)) ? $data : ''), 'value' => $value);
 
-		return "<input ".self::parse_form_attributes($data, $defaults).$extra." />";
+		return "<input ".self::parse_form_attributes($data, $defaults).$extra." >";
 	}
 
 	public static function form_password($data = '', $value = '', $extra = '') {
@@ -166,7 +166,7 @@ class Form {
 			unset($defaults['checked']);
 		}
 
-		return "<input ".self::parse_form_attributes($data, $defaults).$extra." />";
+		return "<input ".self::parse_form_attributes($data, $defaults).$extra." >";
 	}
 
 	public static function form_radio($data = '', $value = '', $checked = false, $extra = '') {
@@ -178,22 +178,22 @@ class Form {
 		return self::form_checkbox($data, $value, $checked, $extra);
 	}
 
-	public static function form_captcha($data = '', $value = '', $captcha = '') {
+	public static function form_captcha($data = '', $value = '', $captcha = '', $extra = '') {
 		$defaults = array('type' => 'captcha', 'name' => (( ! is_array($data)) ? $data : ''), 'value' => $value);		
 
-		return "<span>".$captcha['image']."</span>&nbsp;<input ".self::parse_form_attributes($data, $defaults)." />";
+		return "<span>".$captcha['image']."</span>&nbsp;<input ".self::parse_form_attributes($data, $defaults).$extra." >";
 	}
 	
 	public static function form_submit($data = '', $value = '', $extra = '') {
 		$defaults = array('type' => 'submit', 'name' => (( ! is_array($data)) ? $data : ''), 'value' => $value);
 
-		return "<input ".self::parse_form_attributes($data, $defaults).$extra." />";
+		return "<input ".self::parse_form_attributes($data, $defaults).$extra." >";
 	}
 
 	public static function form_reset($data = '', $value = '', $extra = '') {
 		$defaults = array('type' => 'reset', 'name' => (( ! is_array($data)) ? $data : ''), 'value' => $value);
 
-		return "<input ".self::parse_form_attributes($data, $defaults).$extra." />";
+		return "<input ".self::parse_form_attributes($data, $defaults).$extra." >";
 	}
 
 	public static function form_button($data = '', $content = '', $extra = '') {

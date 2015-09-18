@@ -124,8 +124,7 @@ class Email extends pattern\Singleton {
 	private function set_headers() {
 		$this->headers =
 		"MIME-Version: 1.0\n"
-		. "From: " . $this->sender . "\n"
-		. "To: " . $this->receiver . "\n";
+		. "From: " . $this->sender . "\n";
 
 		if ( ! empty($this->reply_to)) {
 			$this->headers .= "Reply-To: " . $this->reply_to . "\n";

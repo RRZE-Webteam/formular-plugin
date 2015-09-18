@@ -4,7 +4,7 @@
   Plugin Name: Formular
   Plugin URI: http://www.vorlagen.uni-erlangen.de/vorlagen/hilfreiche-plugins/formular.shtml
   Description: Das Formular-Plugin vereinfacht die Erstellung von Formularen, dessen Absenden, Validierung und Weiterverarbeitung.
-  Version: 1.15.0917
+  Version: 1.15.0918
   Author: Rolf v.d. Forst, RRZE WebTeam
   Author Email: rolf.v.d.forst@fau.de
   Author URI: http://blogs.fau.de/webworking/
@@ -274,9 +274,6 @@ class Formular {
                     $data[$field['name']] = isset($postdata[$field['name'] . '_file_name']) ? $postdata[$field['name'] . '_file_name'] : '';
                     
                 } else {
-                    if ($field['type'] == 'input' && !empty($field['emailinfo'])) {
-                        $email_infos[Validation::set_value($field['name'], '')] = $field['emailinfo'];
-                    }
                     $data[$field['name'] . '_keys'] = 0;
                     $data[$field['name'] . '_values'] = Validation::set_value($field['name'], '');
                     $data[$field['name']] = Validation::set_value($field['name'], '');
@@ -392,8 +389,7 @@ class Formular {
                         $arrkeys[] = $key;
                         $arrvalues[] = $val;
                     }
-                    $extra = sprintf('id="%s"', self::filter_value($val));
-                    $form_field = call_user_func(array('Form', 'form_' . $field['type']), $values, '', false, $extra);
+                    $form_field = call_user_func(array('Form', 'form_' . $field['type']), $values, '', false, $field['extra']);
                     $form_fields_arr[] = sprintf('%s <label for="%s">%s</label>', $form_field, self::filter_value($val), $val);
                 }
                 $data[$field['name']] = implode('<br />', $form_fields_arr);
@@ -416,7 +412,7 @@ class Formular {
                 $arrkeys[] = $values['value'];
                 $arrvalues[] = $options[$values['value']];
 
-                $data[$field['name']] = call_user_func(array('Form', 'form_' . $field['type']), $field['name'], $options, $values['value']);
+                $data[$field['name']] = call_user_func(array('Form', 'form_' . $field['type']), $field['name'], $options, $values['value'], $field['extra']);
                 
             } elseif ($field['type'] == 'hidden') {
                 $data[$field['name']] = call_user_func(array('Form', 'form_' . $field['type']), $field['name'], $field['value']);
@@ -426,7 +422,7 @@ class Formular {
                 $values = array();
                 $values['name'] = $field['name'];
 
-                $data[$field['name']] = call_user_func(array('Form', 'form_' . $field['type']), $values);
+                $data[$field['name']] = call_user_func(array('Form', 'form_' . $field['type']), $values, $field['extra']);
                 
             } elseif ($field['type'] == 'captcha') {
 				if (!file_exists(CAPTCHAPATH))
@@ -446,7 +442,7 @@ class Formular {
 				Session::set_userdata('captcha', $captcha['word']);
 				
                 $data[sprintf('%s_error', $field['name'])] = isset($postdata[sprintf('%s_error', $field['name'])]) ? $postdata[sprintf('%s_error', $field['name'])] : '';				
-                $data[$field['name']] = call_user_func(array('Form', 'form_' . $field['type']), $field['name'], $field['value'], $captcha);
+                $data[$field['name']] = call_user_func(array('Form', 'form_' . $field['type']), $field['name'], $field['value'], $captcha, $field['extra']);
 				
             } else {
                 $data[sprintf('%s_error', $field['name'])] = isset($postdata[sprintf('%s_error', $field['name'])]) ? $postdata[sprintf('%s_error', $field['name'])] : '';
@@ -458,7 +454,7 @@ class Formular {
                 $arrkeys[] = 0;
                 $arrvalues[] = $values['value'];
 
-                $data[$field['name']] = call_user_func(array('Form', 'form_' . $field['type']), $values);
+                $data[$field['name']] = call_user_func(array('Form', 'form_' . $field['type']), $values, '', $field['extra']);
             }
 
             if (!in_array($field['type'], array('hidden'))) {
@@ -466,7 +462,7 @@ class Formular {
                 $data[sprintf('%s_values', $field['name'])] = implode(', ', $arrvalues);
             }
         }
-
+		
         if (isset($views['form']) && file_exists($tpl = sprintf('%s%s.html', APPPATH, $views['form'])))
             return Template::parse($tpl, $data, true);
         else
@@ -679,7 +675,7 @@ class Formular {
                     $file_options = true;
                 }
 
-                $conf_arr[$value[0]][] = array('type' => $params[0], 'name' => $params[1], 'value' => $params[2], 'rules' => $params[3], 'emailinfo' => $params[4]);
+                $conf_arr[$value[0]][] = array('type' => $params[0], 'name' => $params[1], 'value' => $params[2], 'rules' => $params[3], 'extra' => $params[4]);
             }
         }
 
