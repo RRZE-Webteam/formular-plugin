@@ -34,7 +34,7 @@ class Validation extends pattern\Singleton {
           'is_natural' => "Das Feld darf nur positive Zahlen enthalten.",
           'is_natural_no_zero' => "Das Feld muss eine Zahl größer als 0 enthalten.",
           'hexcolor' => "Das Feld muss mit # beginnen und durch einen hexadezimalen Farbwert gefolgt.",
-		  'valid_captcha' => "Das Feld muss mit dem Zeichen %s übereinstimmen."
+		  'valid_captcha' => "Die Antwort ist falsch."
         );
 
 	protected static $instance;
@@ -569,8 +569,7 @@ class Validation extends pattern\Singleton {
     }
 
 	public static function valid_captcha($str) {
-		$word = Session::userdata('captcha');
-		if(strcmp(strtoupper($str),strtoupper($word)) == 0){
+		if(Captcha::check_answer($str)){
 			return true;
 		} else{
 			return false;

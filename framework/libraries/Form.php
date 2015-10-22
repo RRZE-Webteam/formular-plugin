@@ -173,7 +173,7 @@ class Form {
 		if ( ! is_array($data)) {
 			$data = array('name' => $data);
 		}
- 
+
 		$data['type'] = 'radio';
 		return self::form_checkbox($data, $value, $checked, $extra);
 	}
@@ -181,7 +181,7 @@ class Form {
 	public static function form_captcha($data = '', $value = '', $captcha = '', $extra = '') {
 		$defaults = array('type' => 'captcha', 'name' => (( ! is_array($data)) ? $data : ''), 'value' => $value);		
 
-		return "<span>".$captcha['image']."</span><br /><input ".self::parse_form_attributes($data, $defaults).$extra." >";
+		return "<span>".$captcha."</span><br><input ".self::parse_form_attributes($data, $defaults).$extra." >";
 	}
 	
 	public static function form_submit($data = '', $value = '', $extra = '') {

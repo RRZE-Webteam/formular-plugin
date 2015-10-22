@@ -4,7 +4,7 @@
   Plugin Name: Formular
   Plugin URI: http://www.vorlagen.uni-erlangen.de/vorlagen/hilfreiche-plugins/formular.shtml
   Description: Das Formular-Plugin vereinfacht die Erstellung von Formularen, dessen Absenden, Validierung und Weiterverarbeitung.
-  Version: 1.15.0921
+  Version: 1.15.1021
   Author: Rolf v.d. Forst, RRZE WebTeam
   Author Email: rolf.v.d.forst@fau.de
   Author URI: http://blogs.fau.de/webworking/
@@ -13,7 +13,7 @@
  */
 
 // Debug
-define('FORMULAR_DEBUG', false);
+define('FORMULAR_DEBUG', true);
 
 // Load framework/setup
 require_once('framework/setup.php');
@@ -21,7 +21,6 @@ require_once('framework/setup.php');
 // Define paths
 define('APPPATH', realpath(pathinfo(__FILE__, PATHINFO_DIRNAME)) . '/');
 define('UPLOADPATH', APPPATH . 'anlagen/');
-define('CAPTCHAPATH', APPPATH . 'captcha/');
 define('ENTRIESPATH', APPPATH . 'eintraege/');
 
 $url_scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://';
@@ -29,7 +28,6 @@ $base_url = $url_scheme . $_SERVER['HTTP_HOST'];
 
 define('BASEURL', $base_url);
 define('DOWNLOADURL', BASEURL . $_SERVER['PHP_SELF'] . '?download-file=');
-define('CAPTCHAURL', BASEURL . $_SERVER['PHP_SELF'] . '?captcha-file=');
 
 $str = <<<EOF
 <div class="hinweis">
@@ -63,11 +61,6 @@ define('LOCK_VIEW', $str);
 
 if (isset($_GET['download-file']) && !empty($_GET['download-file'])) {
     Formular::download_file(Input::get('download-file', true), UPLOADPATH);
-    exit();
-}
-
-if (isset($_GET['captcha-file']) && !empty($_GET['captcha-file'])) {
-    Formular::download_file(Input::get('captcha-file', true), CAPTCHAPATH);
     exit();
 }
 
@@ -425,21 +418,7 @@ class Formular {
                 $data[$field['name']] = call_user_func(array('Form', 'form_' . $field['type']), $values, $field['extra']);
                 
             } elseif ($field['type'] == 'captcha') {
-				if (!file_exists(CAPTCHAPATH))
-					mkdir(CAPTCHAPATH, 0777, true);
-				
-				$captcha_data = array(
-					'word' => substr(number_format(time() * rand(), 0, '', ''), 0, 4),
-					'img_path' => CAPTCHAPATH,
-					'img_url' => CAPTCHAURL,
-					'img_width' => 150,
-					'img_height' => 30,
-					'expiration' => 7200
-				);
-
-				$captcha = Captcha::create($captcha_data);
-				
-				Session::set_userdata('captcha', $captcha['word']);
+				$captcha = Captcha::get_question();
 				
                 $data[sprintf('%s_error', $field['name'])] = isset($postdata[sprintf('%s_error', $field['name'])]) ? $postdata[sprintf('%s_error', $field['name'])] : '';				
                 $data[$field['name']] = call_user_func(array('Form', 'form_' . $field['type']), $field['name'], $field['value'], $captcha, $field['extra']);

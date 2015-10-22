@@ -1,177 +1,140 @@
 <?php if ( !defined('COREPATH') ) exit;
 
+define('CAPTCHA_NUMERIC_TEXT_RANGE_LOW', 0);
+define('CAPTCHA_NUMERIC_TEXT_RANGE_HIGH', 20);
+
+define('CAPTCHA_MAX_QUESTION_NUMBER_SIZE', 10);
+
+define('CAPTCHA_NUM_ADDITION_PHRASES', 5);
+define('CAPTCHA_NUM_SUBTRACTION_PHRASES', 5);
+
 Class Captcha {
 
-	/**
-	 * Create CAPTCHA
-	 *
-	 * @param	array	$data		data for the CAPTCHA
-	 * @param	string	$img_path	path to create the image in
-	 * @param	string	$img_url	URL to the CAPTCHA image folder
-	 * @param	string	$font_path	server path to font
-	 * @return	string
-	 */
-	public static function create($data = '', $img_path = '', $img_url = '', $font_path = '') {
-		$defaults = array(
-			'word' => '',
-			'img_path' => '',
-			'img_url' => '',
-			'img_width' => '150',
-			'img_height' => '30',
-			'font_path' => '',
-			'expiration' => 7200,
-			'word_length' => 8,
-			'font_size' => 16,
-			'img_id' => '',
-			'pool' => '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
-			'colors' => array(
-				'background' => array(255, 255, 255),
-				'border' => array(158, 157, 157),
-				'text' => array(35, 40, 45),
-				'grid' => array(158, 157, 157)
-			)
-		);
+	private static $operation = array('addition', 'subtraction');
+	
+	public static function get_question() {
+		$operation = self::$operation[array_rand(self::$operation)];
 
-		foreach ($defaults as $key => $val) {
-			if (!is_array($data) && empty($$key)) {
-				$$key = $val;
-			} else {
-				$$key = isset($data[$key]) ? $data[$key] : $val;
-			}
-		}
-
-		if ($img_path === '' OR $img_url === ''
-				OR ! is_dir($img_path) OR ! File::is_really_writable($img_path)
-				OR ! extension_loaded('gd')) {
-			return FALSE;
-		}
-
-		// -----------------------------------
-		// Remove old images
-		// -----------------------------------
-
-		$now = microtime(TRUE);
-
-		$current_dir = @opendir($img_path);
-		while ($filename = @readdir($current_dir)) {
-			if (substr($filename, -4) === '.jpg' && (str_replace('.jpg', '', $filename) + $expiration) < $now) {
-				@unlink($img_path . $filename);
-			}
-		}
-
-		@closedir($current_dir);
-
-		// -----------------------------------
-		// Do we have a "word" yet?
-		// -----------------------------------
-
-		if (empty($word)) {
-			$word = '';
-			for ($i = 0, $mt_rand_max = strlen($pool) - 1; $i < $word_length; $i++) {
-				$word .= $pool[mt_rand(0, $mt_rand_max)];
-			}
-		} elseif (!is_string($word)) {
-			$word = (string) $word;
-		}
-
-		// -----------------------------------
-		// Determine angle and position
-		// -----------------------------------
-		$length = strlen($word);
-		$angle = ($length >= 6) ? mt_rand(-($length - 6), ($length - 6)) : 0;
-		$x_axis = mt_rand(6, (360 / $length) - 16);
-		$y_axis = ($angle >= 0) ? mt_rand($img_height, $img_width) : mt_rand(6, $img_height);
-
-		// Create image
-		// PHP.net recommends imagecreatetruecolor(), but it isn't always available
-		$im = function_exists('imagecreatetruecolor') ? imagecreatetruecolor($img_width, $img_height) : imagecreate($img_width, $img_height);
-
-		// -----------------------------------
-		//  Assign colors
-		// ----------------------------------
-
-		is_array($colors) OR $colors = $defaults['colors'];
-
-		foreach (array_keys($defaults['colors']) as $key) {
-			// Check for a possible missing value
-			is_array($colors[$key]) OR $colors[$key] = $defaults['colors'][$key];
-			$colors[$key] = imagecolorallocate($im, $colors[$key][0], $colors[$key][1], $colors[$key][2]);
-		}
-
-		// Create the rectangle
-		ImageFilledRectangle($im, 0, 0, $img_width, $img_height, $colors['background']);
-
-		// -----------------------------------
-		//  Create the spiral pattern
-		// -----------------------------------
-		$theta = 1;
-		$thetac = 7;
-		$radius = 16;
-		$circles = 20;
-		$points = 32;
-
-		for ($i = 0, $cp = ($circles * $points) - 1; $i < $cp; $i++) {
-			$theta += $thetac;
-			$rad = $radius * ($i / $points);
-			$x = ($rad * cos($theta)) + $x_axis;
-			$y = ($rad * sin($theta)) + $y_axis;
-			$theta += $thetac;
-			$rad1 = $radius * (($i + 1) / $points);
-			$x1 = ($rad1 * cos($theta)) + $x_axis;
-			$y1 = ($rad1 * sin($theta)) + $y_axis;
-			imageline($im, $x, $y, $x1, $y1, $colors['grid']);
-			$theta -= $thetac;
-		}
-
-		// -----------------------------------
-		//  Write the text
-		// -----------------------------------
-
-		$use_font = ($font_path !== '' && file_exists($font_path) && function_exists('imagettftext'));
-		if ($use_font === FALSE) {
-			($font_size > 5) && $font_size = 5;
-			$x = mt_rand(0, $img_width / ($length / 3));
-			$y = 0;
+		if ($operation != 'division') {
+			$number1 = rand(1, CAPTCHA_MAX_QUESTION_NUMBER_SIZE);
+			$number2 = rand(1, CAPTCHA_MAX_QUESTION_NUMBER_SIZE);
 		} else {
-			($font_size > 30) && $font_size = 30;
-			$x = mt_rand(0, $img_width / ($length / 1.5));
-			$y = $font_size + 2;
-		}
+			$number1 = rand(1, CAPTCHA_MAX_QUESTION_NUMBER_SIZE);
+			$dividers = array();
 
-		for ($i = 0; $i < $length; $i++) {
-			if ($use_font === FALSE) {
-				$y = mt_rand(0, $img_height / 2);
-				imagestring($im, $font_size, $x, $y, $word[$i], $colors['text']);
-				$x += ($font_size * 2);
-			} else {
-				$y = mt_rand($img_height / 2, $img_height - 3);
-				imagettftext($im, $font_size, $angle, $x, $y, $colors['text'], $font_path, $word[$i]);
-				$x += $font_size;
+			for ($i = 1; $i <= CAPTCHA_MAX_QUESTION_NUMBER_SIZE; $i++) {
+				if ($number1 % $i == 0) {
+					$dividers[] = $i;
+				}
 			}
+
+			$random_key = array_rand($dividers);
+			$number2 = $dividers[$random_key];
 		}
 
-		// Create the border
-		imagerectangle($im, 0, 0, $img_width - 1, $img_height - 1, $colors['border']);
+		switch ($operation) {
+			case 'addition' :
+				$answer = $number1 + $number2;
+				$phrase = 'captcha_addition_2_' . rand(1, CAPTCHA_NUM_ADDITION_PHRASES);
+				break;
 
-		// -----------------------------------
-		//  Generate the image
-		// -----------------------------------
-		$img_url = rtrim($img_url, '/') . '/';
+			case 'subtraction' :
+				$answer = ($number1 > $number2) ? $number1 - $number2 : $number2 - $number1;
+				$phrase = 'captcha_subtraction_2_' . rand(1, CAPTCHA_NUM_SUBTRACTION_PHRASES);
+				break;
 
-		if (function_exists('imagejpeg')) {
-			$img_filename = $now . '.jpg';
-			imagejpeg($im, $img_path . $img_filename);
-		} elseif (function_exists('imagepng')) {
-			$img_filename = $now . '.png';
-			imagepng($im, $img_path . $img_filename);
+			default :
+				return false;
+				break;
+		}
+
+		Session::set_flashdata('captcha_answer', $answer);
+
+		if (($operation == 'subtraction') && ($number1 > $number2)) {
+			return self::compile_question($phrase, array($number2, $number1));
 		} else {
-			return FALSE;
+			return self::compile_question($phrase, array($number1, $number2));
 		}
-
-		$img = '<img ' . ($img_id === '' ? '' : 'id="' . $img_id . '"') . ' src="' . $img_url . $img_filename . '" style="width: ' . $img_width . '; height: ' . $img_height . '; border: 0;" alt=" " />';
-		ImageDestroy($im);
-
-		return array('word' => $word, 'time' => $now, 'image' => $img, 'filename' => $img_filename);
 	}
 
+	private static function compile_question($phrase, $numbers = array()) {
+		if (rand(1, 2) == 1) {
+			$numbers[0] = self::numeric_to_string($numbers[0]);
+		}
+
+		if (rand(1, 2) == 1) {
+			$numbers[1] = self::numeric_to_string($numbers[1]);
+		}
+
+		$question_phrase = self::captcha_text($phrase);
+
+		$question_phrase = str_replace('%1', $numbers[0], $question_phrase);
+		$question_phrase = str_replace('%U1', ucfirst($numbers[0]), $question_phrase);
+		$question_phrase = str_replace('%2', $numbers[1], $question_phrase);
+		$question_phrase = str_replace('%U2', ucfirst($numbers[1]), $question_phrase);
+		
+		return $question_phrase;
+	}
+
+	public static function check_answer($answer) {
+		$mathcaptcha_answer = Session::flashdata('captcha_answer');
+
+		if ($mathcaptcha_answer !== false) {
+			if ($answer === (string) $mathcaptcha_answer ||
+					strcasecmp($answer, self::numeric_to_string($mathcaptcha_answer)) == 0) {
+				return true;
+			} else {
+				return false;
+			}
+
+		} else {
+			return false;
+		}
+	}
+
+	private static function numeric_to_string($number) {
+		if (is_numeric($number) && $number >= CAPTCHA_NUMERIC_TEXT_RANGE_LOW && $number <= CAPTCHA_NUMERIC_TEXT_RANGE_HIGH) {
+			return self::captcha_text('captcha_numeric_word_' . $number);
+		} else {
+			return false;
+		}
+	}
+
+	private static function captcha_text($key) {
+		$text['captcha_numeric_word_0'] = 'null';
+		$text['captcha_numeric_word_1'] = 'eins';
+		$text['captcha_numeric_word_2'] = 'zwei';
+		$text['captcha_numeric_word_3'] = 'drei';
+		$text['captcha_numeric_word_4'] = 'vier';
+		$text['captcha_numeric_word_5'] = 'fünf';
+		$text['captcha_numeric_word_6'] = 'sechs';
+		$text['captcha_numeric_word_7'] = 'sieben';
+		$text['captcha_numeric_word_8'] = 'acht';
+		$text['captcha_numeric_word_9'] = 'neun';
+		$text['captcha_numeric_word_10'] = 'zehn';
+		$text['captcha_numeric_word_11'] = 'elf';
+		$text['captcha_numeric_word_12'] = 'zwölf';
+		$text['captcha_numeric_word_13'] = 'dreizehen';
+		$text['captcha_numeric_word_14'] = 'vierzehn';
+		$text['captcha_numeric_word_15'] = 'fünfzehen';
+		$text['captcha_numeric_word_16'] = 'sechszehn';
+		$text['captcha_numeric_word_17'] = 'siebzehn';
+		$text['captcha_numeric_word_18'] = 'achtzehn';
+		$text['captcha_numeric_word_19'] = 'neunzehn';
+		$text['captcha_numeric_word_20'] = 'zwanzig';
+
+		$text['captcha_addition_2_1'] = 'Was ergibt %1 plus %2?';
+		$text['captcha_addition_2_2'] = 'Was ergibt die Summe aus %1 und %2?';
+		$text['captcha_addition_2_3'] = 'Was erhält man, wenn man %1 und %2 zusammenzählt?';
+		$text['captcha_addition_2_4'] = '%U1 und %2 macht?';
+		$text['captcha_addition_2_5'] = 'Wenn man %1 und %2 zusammenzählt erhält man?';
+
+		$text['captcha_subtraction_2_1'] = 'Was ergibt %2 minus %1?';
+		$text['captcha_subtraction_2_2'] = 'Wenn man %1 von %2 wegnimmt erhält man?';
+		$text['captcha_subtraction_2_3'] = 'Was erhält man, wenn man %1 von %2 abzieht?';
+		$text['captcha_subtraction_2_4'] = '%U2 minus %1 macht?';
+		$text['captcha_subtraction_2_5'] = 'Wenn man %1 von %2 abzieht erhält man?';
+		
+		return $text[$key];
+	}
 }

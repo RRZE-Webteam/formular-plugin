@@ -59,16 +59,21 @@
                 <div class="eingabe">
                     {datei}
                 </div>
-            </div>                
+            </div>
+			<div class="zeile">
+				<div class="datenart">
+					<label for="captcha">Captcha</label>
+					{captcha_error}
+				</div>					
+				<div class="eingabe">
+					{captcha}					
+					<p>Bitte beantworten Sie die Frage um fortzufahren.</p>						
+				</div>
+			</div>			
         </div>
-    </fieldset>
-    <p>Bitte geben Sie die dargestellten Zeichen in das Feld ein:</p>
-    <p>
-            {captcha}
-    </p>    
-    {captcha_error}
-    <p>
-        {form_submit}
-    </p>
+	</fieldset>
+	<p>
+		{form_submit}
+	</p>
 </div>
 {form_close}
