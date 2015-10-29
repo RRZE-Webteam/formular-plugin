@@ -77,11 +77,10 @@ Class Captcha {
 	}
 
 	public static function check_answer($answer) {
-		$mathcaptcha_answer = Session::flashdata('captcha_answer');
+		$captcha_answer = Session::flashdata('captcha_answer');
 
-		if ($mathcaptcha_answer !== false) {
-			if ($answer === (string) $mathcaptcha_answer ||
-					strcasecmp($answer, self::numeric_to_string($mathcaptcha_answer)) == 0) {
+		if ($captcha_answer !== false) {
+			if ($answer === (string) $captcha_answer || strcasecmp($answer, self::numeric_to_string($captcha_answer)) == 0) {
 				return true;
 			} else {
 				return false;

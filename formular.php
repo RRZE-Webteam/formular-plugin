@@ -4,7 +4,7 @@
   Plugin Name: Formular
   Plugin URI: http://www.vorlagen.uni-erlangen.de/vorlagen/hilfreiche-plugins/formular.shtml
   Description: Das Formular-Plugin vereinfacht die Erstellung von Formularen, dessen Absenden, Validierung und Weiterverarbeitung.
-  Version: 1.15.1022
+  Version: 1.15.1029
   Author: Rolf v.d. Forst, RRZE WebTeam
   Author Email: rolf.v.d.forst@fau.de
   Author URI: http://blogs.fau.de/webworking/
@@ -204,6 +204,7 @@ class Formular {
             $postdata = array_merge($postdata, $_POST);
             
             Session::set_flashdata(md5(sprintf('%s-postdata', $appconf)), serialize($postdata));
+			Session::keep_flashdata('captcha_answer');
             Url::redirect(self::$redirect);
         }
         
