@@ -13,11 +13,21 @@ define('LIBPATH', COREPATH.'libraries/');
 require_once(COREPATH.'config/config.php');
 
 // Load singleton pattern
-include_once LIBPATH.'Singleton.php';
+$filename = LIBPATH.'Singleton.php';
+if (file_exists($filename)) {
+	include_once $filename;
+} elseif (file_exists(strtolower($filename))) {
+	include_once strtolower($filename);
+}
 
 // Set autoload function
 spl_autoload_register(function($class) {
-    include LIBPATH.$class.'.php';
+    $filename = LIBPATH.$class.'.php';
+	if (file_exists($filename)) {
+		include_once $filename;
+	} elseif (file_exists(strtolower($filename))) {
+		include_once strtolower($filename);
+	}	
 });
 
 // Set timezone
